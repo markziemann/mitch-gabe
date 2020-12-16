@@ -41,6 +41,9 @@ hist(x$RNAseq)
 
 rownames(x) <- x$Symbol
 x$Symbol=NULL
+
+res <- mitch_calc(x=x,genesets=genesets,priority="effect")
+
 head(res$enrichment_result,30)
 
 ```
@@ -58,10 +61,13 @@ The data also looks to have a skew towards small values for CNV and RNAseq (not 
 nrow(subset(res$enrichment_result, p.adjustMANOVA<0.05) )
 
 hist(subset(res$enrichment_result, p.adjustMANOVA<0.05)$s.CNV)
+hist(res$enrichment_result$s.CNV)
 
 hist(subset(res$enrichment_result, p.adjustMANOVA<0.05)$s.Prot)
+hist(res$enrichment_result$s.Prot)
 
 hist(subset(res$enrichment_result, p.adjustMANOVA<0.05)$s.RNA)
+hist(res$enrichment_result$s.RNAseq)
 
 ```
 
