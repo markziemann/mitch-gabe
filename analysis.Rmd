@@ -1,0 +1,77 @@
+---
+title: "Analysis of Gabe's data to investigate false positives"
+author: "Mark Ziemann"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+theme: cosmo
+---
+
+Source codes: https://github.com/markziemann/mitch-gabe
+
+## Background
+
+Here we are investigating report of higher than expected rate of false positives (Type 1 errors).
+
+```{r,pkg}
+
+library("readxl")
+library("mitch")
+
+```
+
+## Load data
+
+Let's have a look at the data.
+
+```{r,load_data}
+
+# genesets 
+genesets <- gmt_import("cluster_pathway_collection_20201117.txt")
+length(genesets)
+hist(unlist(lapply(genesets,length)))
+summary(unlist(lapply(genesets,length)))
+
+x <- readxl::read_xlsx("test_mitch_input_20201214.xlsx")
+x <- as.data.frame(x)
+hist(x$CNV)
+hist(x$Prot)
+hist(x$RNAseq)
+
+rownames(x) <- x$Symbol
+x$Symbol=NULL
+head(res$enrichment_result,30)
+
+```
+
+It looks as if the values for input data are between 0 and 1, which is indicates that the
+p-values were used for ranking.
+This is not the recommended way of using mitch.
+There should be positive and negative values in the prot and RNAseq data at least, to indicate
+that some genes are up and down regulated.
+As it stands, mitch does not do a 1-tailed test.
+The data also looks to have a skew towards small values for CNV and RNAseq (not sure about protein).
+
+```{r,analysis}
+
+nrow(subset(res$enrichment_result, p.adjustMANOVA<0.05) )
+
+hist(subset(res$enrichment_result, p.adjustMANOVA<0.05)$s.CNV)
+
+hist(subset(res$enrichment_result, p.adjustMANOVA<0.05)$s.Prot)
+
+hist(subset(res$enrichment_result, p.adjustMANOVA<0.05)$s.RNA)
+
+```
+
+So there are 37 clusters with FDR<0.05. 
+There is a mixture of "up" and "down" regulated genes.
+
+## Session info
+
+```{r,sessioninfo}
+
+sessionInfo()
+
+```
